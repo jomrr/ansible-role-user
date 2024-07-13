@@ -1,0 +1,14 @@
+---
+# role: jomrr.user
+# file: meta/main.yml
+
+galaxy_info:
+  namespace: jomrr
+  role_name: user
+  author: Jonas Mauer
+  company: none
+  description: Ansible role for managing local user accounts.
+  license: MIT
+  issue_tracker_url: https://github.com/jomrr/ansible-role-user/issues
+  min_ansible_version: "2.17"
+  galaxy_tags: []
