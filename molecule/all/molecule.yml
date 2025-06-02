@@ -25,26 +25,14 @@ provisioner:
 verifier:
   name: ansible
 platforms:
-  - name: almalinux-8-user
-    image: "docker.io/jomrr/molecule-almalinux:8"
+  - name: almalinux-latest-user
+    image: "docker.io/jomrr/molecule-almalinux:latest"
     pre_build_image: true
     entrypoint: null
     command: null
     systemd: true
-  - name: almalinux-9-user
-    image: "docker.io/jomrr/molecule-almalinux:9"
-    pre_build_image: true
-    entrypoint: null
-    command: null
-    systemd: true
-  - name: alpine-3.18-user
-    image: "docker.io/jomrr/molecule-alpine:3.18"
-    pre_build_image: true
-    entrypoint: null
-    command: null
-    systemd: true
-  - name: alpine-3.19-user
-    image: "docker.io/jomrr/molecule-alpine:3.19"
+  - name: alpine-latest-user
+    image: "docker.io/jomrr/molecule-alpine:latest"
     pre_build_image: true
     entrypoint: null
     command: null
@@ -55,26 +43,26 @@ platforms:
     entrypoint: null
     command: null
     systemd: true
-  - name: debian-11-user
-    image: "docker.io/jomrr/molecule-debian:11"
+  - name: debian-oldstable-user
+    image: "docker.io/jomrr/molecule-debian:oldstable"
     pre_build_image: true
     entrypoint: null
     command: null
     systemd: true
-  - name: debian-12-user
-    image: "docker.io/jomrr/molecule-debian:12"
+  - name: debian-stable-user
+    image: "docker.io/jomrr/molecule-debian:stable"
     pre_build_image: true
     entrypoint: null
     command: null
     systemd: true
-  - name: debian-13-user
-    image: "docker.io/jomrr/molecule-debian:13"
+  - name: debian-testing-user
+    image: "docker.io/jomrr/molecule-debian:testing"
     pre_build_image: true
     entrypoint: null
     command: null
     systemd: true
-  - name: fedora-40-user
-    image: "docker.io/jomrr/molecule-fedora:40"
+  - name: fedora-latest-user
+    image: "docker.io/jomrr/molecule-fedora:latest"
     pre_build_image: true
     entrypoint: null
     command: null
@@ -91,14 +79,8 @@ platforms:
     entrypoint: null
     command: null
     systemd: true
-  - name: ubuntu-22.04-user
-    image: "docker.io/jomrr/molecule-ubuntu:22.04"
-    pre_build_image: true
-    entrypoint: null
-    command: null
-    systemd: true
-  - name: ubuntu-24.04-user
-    image: "docker.io/jomrr/molecule-ubuntu:24.04"
+  - name: ubuntu-latest-user
+    image: "docker.io/jomrr/molecule-ubuntu:latest"
     pre_build_image: true
     entrypoint: null
     command: null
