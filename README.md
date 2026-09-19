@@ -41,6 +41,8 @@ existing accounts.
 
 ```yaml
 collections:
+  - name: community.general
+    version: '>=12.0.0'
   - name: ansible.posix
     version: '>=2.0.0'
 ```
