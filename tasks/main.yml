@@ -28,7 +28,7 @@
     comment: "{{ __user_account.comment | default(omit) }}"
     group: "{{ __user_account.group | default(omit) }}"
     groups: "{{ __user_account.groups | default(omit) }}"
-    append: "{{ __user_account.append | default(user_append) }}"
+    append: "{{ (__user_account.append | default(user_append)) if __user_account.groups is defined else omit }}"
     home: "{{ __user_account.home | default(omit) }}"
     create_home: "{{ __user_account.create_home | default(user_create_home) }}"
     shell: "{{ __user_account.shell | default(omit) }}"
