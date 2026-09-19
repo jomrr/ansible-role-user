@@ -1,11 +1,87 @@
-# role: jomrr.user
+---
+# role: user
 # file: molecule/resources/playbooks/verify.yml
 
-- name: "PLAYBOOK | Verify | user"
+- name: "USER | Verify account and SSH access management"
   hosts: all
   gather_facts: false
   tasks:
-    - name: "Assert true"
+    - name: "USER | Read local account records"
+      ansible.builtin.getent:
+        database: passwd
+
+    - name: "USER | Verify account lifecycle and custom home"
       ansible.builtin.assert:
-        that: "true"
-        fail_msg: "This should never fail"
+        that:
+          - ansible_facts.getent_passwd.molecule_new[4] == '/srv/molecule_new'
+          - "'molecule_preserved' in ansible_facts.getent_passwd"
+          - "'molecule_rotated' in ansible_facts.getent_passwd"
+          - "'molecule_retired' not in ansible_facts.getent_passwd"
+        quiet: true
+
+    - name: "USER | Inspect the retired account home"
+      ansible.builtin.stat:
+        path: /home/molecule_retired
+      register: __user_test_retired_home
+
+    - name: "USER | Verify requested home removal"
+      ansible.builtin.assert:
+        that: not __user_test_retired_home.stat.exists
+        quiet: true
+
+    - name: "USER | Read password records"
+      become: true
+      become_user: root
+      ansible.builtin.getent:
+        database: shadow
+      no_log: true
+
+    - name: "USER | Verify password creation, rotation, and preservation policies"
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.getent_shadow.molecule_new[0] == __user_test_password_new
+          - ansible_facts.getent_shadow.molecule_rotated[0] == __user_test_password_new
+          - ansible_facts.getent_shadow.molecule_preserved[0] == __user_test_password_old
+          - ansible_facts.getent_shadow.molecule_cleared[0] == __user_test_password_old
+        quiet: true
+      no_log: true
+
+    - name: "USER | Read effective authorized key batches"
+      become: true
+      become_user: root
+      ansible.builtin.slurp:
+        src: "{{ __user_test_key_file.home }}/.ssh/authorized_keys"
+      loop:
+        - name: molecule_new
+          home: /srv/molecule_new
+          keys:
+            - "{{ __user_test_key_one }}"
+        - name: molecule_preserved
+          home: /home/molecule_preserved
+          keys:
+            - "{{ __user_test_key_stale }}"
+            - "{{ __user_test_key_one }}"
+        - name: molecule_rotated
+          home: /home/molecule_rotated
+          keys:
+            - "{{ __user_test_key_one }}"
+            - "{{ __user_test_key_two }}"
+        - name: molecule_cleared
+          home: /home/molecule_cleared
+          keys: []
+      loop_control:
+        loop_var: __user_test_key_file
+        label: "{{ __user_test_key_file.name }}"
+      register: __user_test_key_files
+
+    - name: "USER | Verify additive, exclusive, and empty key batches"
+      ansible.builtin.assert:
+        that:
+          - >-
+            (__user_test_key_result.content | b64decode).splitlines() | sort
+            == __user_test_key_result.__user_test_key_file['keys'] | sort
+        quiet: true
+      loop: "{{ __user_test_key_files.results }}"
+      loop_control:
+        loop_var: __user_test_key_result
+        label: "{{ __user_test_key_result.__user_test_key_file.name }}"

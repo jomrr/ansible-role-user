@@ -1,0 +1,57 @@
+---
+# role: user
+# file: tasks/main.yml
+
+- name: "USER | Load platform settings"
+  ansible.builtin.include_vars: "{{ lookup('ansible.builtin.first_found', __user_platform_files) }}"
+  vars:
+    __user_platform_files:
+      files:
+        - "{{ ansible_facts.os_family }}.yml"
+      paths:
+        - "{{ role_path }}/vars"
+
+- name: "USER | Install account management utilities"
+  become: true
+  become_user: root
+  ansible.builtin.package:
+    name: "{{ __user_packages }}"
+    state: present
+
+- name: "USER | Manage accounts and passwords"
+  become: true
+  become_user: root
+  ansible.builtin.user:
+    name: "{{ __user_account.name }}"
+    state: "{{ __user_account.state | default('present') }}"
+    uid: "{{ __user_account.uid | default(omit) }}"
+    comment: "{{ __user_account.comment | default(omit) }}"
+    group: "{{ __user_account.group | default(omit) }}"
+    groups: "{{ __user_account.groups | default(omit) }}"
+    append: "{{ __user_account.append | default(user_append) }}"
+    home: "{{ __user_account.home | default(omit) }}"
+    create_home: "{{ __user_account.create_home | default(user_create_home) }}"
+    shell: "{{ __user_account.shell | default(omit) }}"
+    system: "{{ __user_account.system | default(omit) }}"
+    password: "{{ __user_account.password | default(omit) }}"
+    password_lock: "{{ __user_account.password_lock | default(omit) }}"
+    update_password: "{{ __user_account.update_password | default(user_update_password) }}"
+    remove: "{{ __user_account.remove | default(user_remove) }}"
+  loop: "{{ user_accounts }}"
+  loop_control:
+    loop_var: __user_account
+    label: "{{ __user_account.name }}"
+  no_log: true
+
+- name: "USER | Manage authorized SSH keys"
+  become: true
+  become_user: root
+  ansible.posix.authorized_key:
+    user: "{{ __user_authorized_keys.name }}"
+    key: "{{ __user_authorized_keys['keys'] | join('\n') }}"
+    state: "{{ __user_authorized_keys.state | default('present') }}"
+    exclusive: "{{ __user_authorized_keys.exclusive | default(user_authorized_keys_exclusive) }}"
+  loop: "{{ user_authorized_keys }}"
+  loop_control:
+    loop_var: __user_authorized_keys
+    label: "{{ __user_authorized_keys.name }}"

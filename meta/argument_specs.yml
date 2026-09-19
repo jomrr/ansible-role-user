@@ -1,0 +1,164 @@
+---
+# role: user
+# file: meta/argument_specs.yml
+
+argument_specs:
+  main:
+    short_description: Manage local accounts and passwords before applying authorized
+      SSH keys.
+    options:
+      user_accounts:
+        type: list
+        elements: dict
+        default: []
+        description:
+          - Local accounts managed with ansible.builtin.user; each entry requires name.
+          - Optional account properties are state, uid, comment, group, groups, append,
+            home, create_home, shell, system, password, password_lock, update_password,
+            and remove.
+          - State defaults to present. Password accepts an existing Linux password hash;
+            omitting it leaves an existing password unchanged. Groups must already exist.
+          - Append, create_home, update_password, and remove inherit the corresponding role-wide
+            policy unless explicitly overridden in the account entry.
+        options:
+          name:
+            type: str
+            required: true
+            description:
+              - Local account name.
+          state:
+            type: str
+            default: present
+            choices:
+              - present
+              - absent
+            description:
+              - Whether the account exists.
+          uid:
+            type: int
+            description:
+              - Numeric user ID; omitted values follow the operating system defaults.
+          comment:
+            type: str
+            description:
+              - Account description or full name.
+          group:
+            type: str
+            description:
+              - Existing primary group name.
+          groups:
+            type: list
+            elements: str
+            description:
+              - Existing supplementary groups; use an empty list with append false to remove
+                all memberships.
+          append:
+            type: bool
+            description:
+              - Preserve supplementary groups not listed in groups; defaults to user_append.
+          home:
+            type: path
+            description:
+              - Home directory path; existing home contents are not moved.
+          create_home:
+            type: bool
+            description:
+              - Create the account home directory; defaults to user_create_home.
+          shell:
+            type: path
+            description:
+              - Login shell path.
+          system:
+            type: bool
+            description:
+              - Create a system account; existing accounts are not converted.
+          password:
+            type: str
+            no_log: true
+            description:
+              - Linux password hash, or a lock marker such as !; cleartext passwords are
+                not hashed by the role.
+          password_lock:
+            type: bool
+            description:
+              - Lock or unlock password authentication; this does not disable SSH public
+                key authentication.
+          update_password:
+            type: str
+            choices:
+              - always
+              - on_create
+            description:
+              - When to apply the supplied password hash; defaults to user_update_password.
+          remove:
+            type: bool
+            description:
+              - Remove the home directory and mail spool with an absent account; defaults
+                to user_remove.
+      user_authorized_keys:
+        type: list
+        elements: dict
+        default: []
+        description:
+          - One key batch per existing or newly managed account, requiring name and keys.
+          - Keys is a list of public key lines, optionally including authorized_keys options.
+            State defaults to present; absent removes the listed keys.
+          - Exclusive inherits user_authorized_keys_exclusive. With exclusive true and state
+            present, the batch replaces all keys; an empty keys list clears authorized_keys.
+          - Do not include accounts removed by user_accounts. Omitted accounts retain their
+            authorized keys.
+        options:
+          name:
+            type: str
+            required: true
+            description:
+              - Account name; the account must exist by the authorized key phase.
+          keys:
+            type: list
+            elements: str
+            required: true
+            description:
+              - Public key lines submitted together so exclusive mode preserves every key
+                in the batch.
+          state:
+            type: str
+            default: present
+            choices:
+              - present
+              - absent
+            description:
+              - Add or remove the listed public keys.
+          exclusive:
+            type: bool
+            description:
+              - Remove keys outside the batch in state present; defaults to user_authorized_keys_exclusive.
+      user_create_home:
+        type: bool
+        default: true
+        description:
+          - Create home directories unless overridden per account.
+      user_append:
+        type: bool
+        default: true
+        description:
+          - Preserve unlisted supplementary group memberships unless overridden per account.
+      user_remove:
+        type: bool
+        default: false
+        description:
+          - Remove home directories and mail spools when deleting accounts unless overridden
+            per account.
+      user_update_password:
+        type: str
+        default: always
+        choices:
+          - always
+          - on_create
+        description:
+          - Apply changed password hashes always or only when creating accounts, unless
+            overridden per account.
+      user_authorized_keys_exclusive:
+        type: bool
+        default: false
+        description:
+          - Remove authorized keys outside each present batch unless overridden per account.

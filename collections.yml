@@ -1,0 +1,7 @@
+---
+# role: user
+# file: collections.yml
+
+collections:
+  - name: ansible.posix
+    version: '>=2.0.0'

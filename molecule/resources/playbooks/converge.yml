@@ -1,7 +1,8 @@
-# role: jomrr.user
+---
+# role: user
 # file: molecule/resources/playbooks/converge.yml
 
-- name: "PLAYBOOK | Converge | user"
+- name: "Molecule | converge | user"
   hosts: all
   gather_facts: true
   roles:

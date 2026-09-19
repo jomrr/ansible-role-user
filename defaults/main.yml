@@ -1,0 +1,38 @@
+---
+# role: user
+# file: defaults/main.yml
+
+# Local accounts; omitted account properties retain the user module defaults.
+user_accounts: []
+# user_accounts:
+#   - name: alice
+#     comment: Alice Example
+#     shell: /bin/bash
+#     password: "{{ vault_alice_password_hash }}"
+#   - name: retired
+#     state: absent
+#     remove: true
+
+# Public SSH keys, processed as one batch per account after account management.
+user_authorized_keys: []
+# user_authorized_keys:
+#   - name: alice
+#     keys:
+#       - "{{ lookup('ansible.builtin.file', 'public_keys/alice.pub') }}"
+#     exclusive: true
+
+# Create home directories for managed accounts unless overridden per account.
+user_create_home: true
+
+# Preserve supplementary group memberships unless overridden per account.
+user_append: true
+
+# Retain home directories when deleting accounts unless overridden per account.
+user_remove: false
+
+# Apply changed password hashes to existing accounts as well as new accounts.
+user_update_password: always
+# user_update_password: on_create
+
+# Preserve unlisted authorized keys unless overridden per account.
+user_authorized_keys_exclusive: false

@@ -1,0 +1,6 @@
+---
+# role: user
+# file: vars/Suse.yml
+
+__user_packages:
+  - shadow

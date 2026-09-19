@@ -1,33 +1,42 @@
-# role: jomrr.user
+---
+# role: user
 # file: molecule/resources/playbooks/prepare.yml
 
-- name: "PLAYBOOK | Prepare | user"
+- name: "USER | Prepare account and access fixtures"
   hosts: all
-  become: true
-  gather_facts: true
+  gather_facts: false
   tasks:
-    - name: "Update apk cache"
-      community.general.apk:
-        update_cache: true
-      when: ansible_pkg_mgr == "apk"
+    - name: "USER | Wait for Ansible connectivity"
+      ansible.builtin.wait_for_connection:
+        timeout: 60
 
-    - name: "Update apt cache"
-      ansible.builtin.apt:
-        update_cache: true
-      when: ansible_pkg_mgr == "apt"
+    - name: "USER | Create existing accounts with an initial password"
+      become: true
+      become_user: root
+      ansible.builtin.user:
+        name: "{{ __user_test_account }}"
+        password: "{{ __user_test_password_old }}"
+        create_home: true
+      loop:
+        - molecule_preserved
+        - molecule_rotated
+        - molecule_cleared
+        - molecule_retired
+      loop_control:
+        loop_var: __user_test_account
+        label: "{{ __user_test_account }}"
+      no_log: true
 
-    - name: "Update dnf cache"
-      ansible.builtin.dnf:
-        update_cache: true
-      when: ansible_pkg_mgr == "dnf"
-
-    - name: "Update pacman cache"
-      community.general.pacman:
-        update_cache: true
-      when: ansible_pkg_mgr == "pacman"
-
-    - name: "Update zypper cache"
-      community.general.zypper:
-        name: sudo
-        update_cache: true
-      when: ansible_pkg_mgr == "zypper"
+    - name: "USER | Seed existing public keys"
+      become: true
+      become_user: root
+      ansible.posix.authorized_key:
+        user: "{{ __user_test_account }}"
+        key: "{{ __user_test_key_stale }}"
+      loop:
+        - molecule_preserved
+        - molecule_rotated
+        - molecule_cleared
+      loop_control:
+        loop_var: __user_test_account
+        label: "{{ __user_test_account }}"
